@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>SSE vs WebSocket</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
+    <link rel="stylesheet" href="dist/reset.css" />
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/white.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section data-background-image="https://your_image.jpg">
+          <h2 class="title">
+            SSE vs WebSockets: сравнение двух технологий в веб-разработке
+          </h2>
+          <div style="height: 1px; border-bottom: 1px dashed lightgrey" />
+          <p class="subtitle" style="color: grey">
+            Тагай Алдияр<br />Software Developer in Digital Window
+          </p>
+        </section>
+
+        <section>
+          <section data-auto-animate="websockets">
+            <h2 class="title">Что такое WebSocket?</h2>
+            <div
+              style="
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+              "
+            >
+              <ul>
+                <li>Определение WebSocket.</li>
+                <li class="fragment highlight">Принцип работы WebSocket.</li>
+                <li class="fragment highlight">Основные характеристики.</li>
+                <li class="fragment highlight">Преимущества WebSocket:</li>
+                <li class="fragment highlight">Недостатки WebSocket.</li>
+              </ul>
+              <img src="/assets/whatIsWS.png" alt="two-people" width="700px" />
+              <aside class="notes">
+                <h1>Что такое WebSocket?</h1>
+                <p>
+                  WebSocket - это технология веб-сокетов, которая обеспечивает
+                  двустороннюю связь между клиентом и сервером через одно
+                  TCP-соединение.
+                </p>
+
+                <h2>Принцип работы WebSocket:</h2>
+                <p>
+                  WebSocket устанавливает постоянное соединение между клиентом и
+                  сервером, позволяя обеим сторонам обмениваться данными в
+                  реальном времени без необходимости постоянного создания новых
+                  HTTP-запросов.
+                </p>
+
+                <h2>Основные характеристики WebSocket:</h2>
+                <ul>
+                  <li>Двусторонняя связь</li>
+                  <li>Постоянное соединение</li>
+                </ul>
+
+                <h2>Преимущества WebSocket:</h2>
+                <ul>
+                  <li>
+                    Высокая производительность: WebSocket обеспечивает быструю
+                    передачу данных в реальном времени.
+                  </li>
+                  <li>
+                    Меньшая нагрузка на сервер: постоянное соединение снижает
+                    нагрузку на сервер в сравнении с частыми HTTP-запросами.
+                  </li>
+                </ul>
+
+                <h2>Недостатки WebSocket:</h2>
+                <p>
+                  Недостатки WebSocket обычно связаны с тем, что некоторые
+                  прокси-серверы и брандмауэры могут блокировать или
+                  ограничивать его использование, что может затруднить его
+                  внедрение в некоторых средах.
+                </p>
+              </aside>
+            </div>
+          </section>
+          <section data-auto-animate="websockets">
+            <div
+              style="
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+              "
+            >
+              <img src="/assets/whatIsWS.png" alt="two-people" width="40%" />
+              <div
+                style="
+                  display: flex;
+                  width: 50%;
+                  justify-content: center;
+                  flex-direction: column;
+                  align-items: center;
+                "
+              >
+                <p>Упрощённый пример заголовков исходного запроса</p>
+                <pre><code class="hljs javascript" data-trim data-line-numbers="|3,5">
+					<script type="text/template">
+					GET ws://websocket.example.com/ HTTP/1.1
+					Origin: http://example.com
+					Connection: Upgrade
+					Host: websocket.example.com
+					Upgrade: websocket
+				</script></code></pre>
+                <pre><code data-trim data-noescape>
+					// Создаём новое WebSocket-соединение.
+					var socket = new WebSocket('ws://websocket.example.com');
+					  </code></pre>
+                <pre class="fragment"><code data-trim  data-line-numbers="3,4">
+						HTTP/1.1 101 Switching Protocols
+						Date: Wed, 25 Oct 2017 10:07:34 GMT
+						Connection: Upgrade
+						Upgrade: WebSocket
+				</code></pre>
+
+                <aside class="notes">
+                  <h2>Как начинается процесс соединения с сервером?</h2>
+                  <p>
+                    Клиент устанавливает соединение, выполняя процесс так
+                    называемого рукопожатия WebSocket. Этот процесс начинается с
+                    того, что клиент отправляет серверу обычный HTTP-запрос. В
+                    этот запрос включается заголовок Upgrade, который сообщает
+                    серверу о том, что клиент желает установить
+                    WebSocket-соединение.
+                  </p>
+
+                  <p>
+                    Если сервер поддерживает протокол WebSocket, он согласится
+                    перейти на него и сообщит об этом в заголовке ответа Upgrade
+                  </p>
+
+                  <p>
+                    Углубляться в процессы того как работают фреймы,
+                    фрагментация данных,heartbeat-сообщений и тд можете
+                    прочитать об этом в документации технологии.
+                  </p>
+                </aside>
+              </div>
+            </div>
+          </section>
+        </section>
+        <section data-auto-animate="sse">
+          <h2 class="title">Что такое SSE?</h2>
+          <div style="display: flex; justify-content: space-around">
+            <ul>
+              <li>Определение SSE.</li>
+              <li class="fragment highlight">Принцип работы SSE.</li>
+              <li class="fragment highlight">Основные характеристики.</li>
+              <li class="fragment highlight">Преимущества SSE.</li>
+              <li class="fragment highlight">Недостатки SSE.</li>
+            </ul>
+            <img src="/assets/sse.png" alt="two-people" width="40%" />
+          </div>
+          <aside class="notes">
+            <h1>Что такое SSE?</h1>
+            <p>
+              SSE (Server-Sent Events) - это веб-технология, которая позволяет
+              серверу отправлять асинхронные сообщения клиенту через
+              HTTP-протокол. Она обеспечивает одностороннюю связь, где данные
+              передаются только от сервера к клиенту.
+            </p>
+
+            <h2>Принцип работы SSE:</h2>
+            <p>
+              Принцип работы SSE довольно прост: клиент устанавливает соединение
+              с сервером и остается открытым, ожидая получения данных. Сервер
+              может отправлять данные клиенту в любое время, даже без запроса со
+              стороны клиента. Для этого используется специальный формат ответа
+              HTTP, который содержит заголовок "Content-Type:
+              text/event-stream".
+            </p>
+
+            <h2>Основные характеристики SSE:</h2>
+            <ol>
+              <li>
+                Односторонняя связь: данные передаются только от сервера к
+                клиенту.
+              </li>
+              <li>
+                Серверная инициированная отправка данных: сервер отправляет
+                данные клиенту без запроса.
+              </li>
+              <li>
+                Использование HTTP протокола: данные передаются через HTTP, что
+                делает SSE легко интегрируемой с существующими веб-приложениями.
+              </li>
+            </ol>
+
+            <h2>Преимущества SSE:</h2>
+            <ul>
+              <li>
+                Простота в использовании: SSE предоставляет простой и понятный
+                механизм для организации односторонней связи между сервером и
+                клиентом.
+              </li>
+              <li>
+                Нативная поддержка браузерами: большинство современных
+                веб-браузеров поддерживают SSE без необходимости использования
+                сторонних библиотек или плагинов.
+              </li>
+            </ul>
+
+            <h2>Недостатки SSE:</h2>
+            <ul>
+              <li>
+                Ограниченная поддержка браузерами: хотя большинство современных
+                браузеров поддерживают SSE, некоторые старые или
+                малоиспользуемые браузеры могут не поддерживать эту технологию.
+              </li>
+              <li>
+                Не поддерживается двунаправленный обмен данными: SSE подходит
+                только для передачи данных от сервера к клиенту и не
+                предоставляет возможности для обратной связи от клиента к
+                серверу без использования дополнительных технологий, таких как
+                WebSocket.
+              </li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-auto-animate="sse">
+          <div
+            style="
+              display: flex;
+              flex-direction: row;
+              align-items: start;
+              justify-content: space-around;
+            "
+          >
+            <img src="/assets/sse.png" alt="two-people" width="40%" />
+            <div
+              style="
+                display: flex;
+                width: 50%;
+                justify-content: center;
+                flex-direction: column;
+                align-items: center;
+              "
+            >
+              <p>На сервере (Node.js с использованием Express):</p>
+              <pre><code class="hljs javascript" data-trim data-line-numbers="|3-5|10">
+					<script type="text/template">
+						app.get('/sse', (req, res) => {
+							// Установка заголовков для SSE
+							res.setHeader('Content-Type', 'text/event-stream');
+							res.setHeader('Cache-Control', 'no-cache');
+							res.setHeader('Connection', 'keep-alive');
+						
+							// Отправка данных клиенту через SSE каждую секунду
+							setInterval(() => {
+								const data = { message: 'Привет, мир!' };
+								res.write(`data: ${JSON.stringify(data)}\n\n`);
+							}, 1000);
+						});
+				</script></code></pre>
+              <p>На клиенте (JavaScript):</p>
+              <pre><code data-trim data-noescape  data-line-numbers="|2|5-8"><script type="text/template">
+				// Создание EventSource для подключения к SSE на сервере
+				const eventSource = new EventSource('/sse');
+				
+				// Обработчик события для получения данных от сервера через SSE
+				eventSource.onmessage = function(event) {
+					const data = JSON.parse(event.data);
+					sseDataElement.innerHTML = `Получено: ${data.message}`;
+				};
+			</script>
+				</code></pre>
+
+              <aside class="notes">
+                <h2>Настройка серверной стороны:</h2>
+                <p>
+                  В случае использования Node.js с Express, это реализовывается
+                  с помощью создания маршрута для обработки SSE-запросов.
+                </p>
+                <h2>Установка HTTP-заголовков:</h2>
+                <p>
+                  Необходимо установить определенные HTTP-заголовки для
+                  правильной обработки соединения. Это включает заголовок
+                  "Content-Type" с значением "text/event-stream",
+                  "Cache-Control" с параметром "no-cache" и "Connection" с
+                  параметром "keep-alive".
+                </p>
+                <h2>Отправка данных клиенту:</h2>
+                <p>
+                  После установки соединения сервер может начать отправлять
+                  данные клиенту через это соединение. Данные обычно
+                  отправляются в формате "event: event_name\ndata: данные\n\n",
+                  где "event_name" - это имя события, если оно указано, а
+                  "данные" - это данные, которые сервер отправляет клиенту.
+                </p>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        <section data-background-image="https://your_image4.jpg">
+          <h2 class="title">Сходства и различия между SSE и WebSocket</h2>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Критерий</th>
+                <th>SSE</th>
+                <th>WebSocket</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Тип связи</td>
+                <td>Односторонняя (сервер -> клиент)</td>
+                <td>Двусторонняя (сервер <-> клиент)</td>
+              </tr>
+              <tr>
+                <td>Инициатор связи</td>
+                <td>Сервер</td>
+                <td>Сервер/клиент</td>
+              </tr>
+              <tr>
+                <td>Поддержка браузеров</td>
+                <td>Нативная</td>
+                <td>Не полная</td>
+              </tr>
+              <tr>
+                <td>Протокол</td>
+                <td>HTTP</td>
+                <td>WebSocket</td>
+              </tr>
+              <tr>
+                <td>Производительность</td>
+                <td>Низкая/Средняя</td>
+                <td>Высокая</td>
+              </tr>
+              <tr>
+                <td>Нагрузка на сервер</td>
+                <td>Низкая</td>
+                <td>Средняя/Высокая</td>
+              </tr>
+              <tr>
+                <td>Сложность реализации</td>
+                <td>Простая</td>
+                <td>Сложная</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <aside class="notes">
+            * SSE - простой и удобный вариант для односторонней связи. *
+            WebSocket - более мощный и производительный инструмент для
+            двусторонней связи в реальном времени. * Выбор между SSE и WebSocket
+            зависит от конкретной задачи.
+          </aside>
+        </section>
+
+        <section data-auto-animate>
+          <h2 class="title">Когда использовать SSE, а когда WebSocket</h2>
+          <ul>
+            <li>SSE:</li>
+            <ul>
+              <li>Простые задачи, где не требуется двусторонняя связь.</li>
+              <li>
+                Обновление информации в реальном времени, например, новости,
+                биржевые сводки.
+              </li>
+              <li>Чаты с низкой интенсивностью обмена сообщениями.</li>
+            </ul>
+            <li>WebSocket:</li>
+            <ul>
+              <li>
+                Задачи, где требуется двусторонняя связь в реальном времени.
+              </li>
+              <li>Игры, чаты, онлайн-редакторы.</li>
+              <li>
+                Приложения, где важна высокая производительность и низкая
+                задержка.
+              </li>
+            </ul>
+          </ul>
+        </section>
+      </div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script>
+      // More info about initialization & config:
+      // - https://revealjs.com/initialization/
+      // - https://revealjs.com/config/
+      Reveal.initialize({
+        hash: true,
+        width: 1920,
+        height: 1080,
+        // Learn about plugins: https://revealjs.com/plugins/
+        plugins: [RevealMarkdown, RevealHighlight, RevealNotes],
+      });
+    </script>
+  </body>
+</html>
