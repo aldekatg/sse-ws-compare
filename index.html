@@ -48,7 +48,6 @@
               <ul>
                 <li>Определение WebSocket.</li>
                 <li class="fragment highlight">Принцип работы WebSocket.</li>
-                <li class="fragment highlight">Основные характеристики.</li>
                 <li class="fragment highlight">Преимущества WebSocket:</li>
                 <li class="fragment highlight">Недостатки WebSocket.</li>
               </ul>
@@ -56,7 +55,7 @@
               <aside class="notes">
                 <h1>Что такое WebSocket?</h1>
                 <p>
-                  WebSocket - это технология веб-сокетов, которая обеспечивает
+                  WebSocket - это технология которая обеспечивает
                   двустороннюю связь между клиентом и сервером через одно
                   TCP-соединение.
                 </p>
@@ -65,15 +64,8 @@
                 <p>
                   WebSocket устанавливает постоянное соединение между клиентом и
                   сервером, позволяя обеим сторонам обмениваться данными в
-                  реальном времени без необходимости постоянного создания новых
-                  HTTP-запросов.
+                  реальном времени
                 </p>
-
-                <h2>Основные характеристики WebSocket:</h2>
-                <ul>
-                  <li>Двусторонняя связь</li>
-                  <li>Постоянное соединение</li>
-                </ul>
 
                 <h2>Преимущества WebSocket:</h2>
                 <ul>
@@ -124,17 +116,12 @@
 					Host: websocket.example.com
 					Upgrade: websocket
 				</script></code></pre>
-                <pre><code data-trim data-noescape>
-					// Создаём новое WebSocket-соединение.
-					var socket = new WebSocket('ws://websocket.example.com');
-					  </code></pre>
                 <pre class="fragment"><code data-trim  data-line-numbers="3,4">
 						HTTP/1.1 101 Switching Protocols
 						Date: Wed, 25 Oct 2017 10:07:34 GMT
 						Connection: Upgrade
 						Upgrade: WebSocket
 				</code></pre>
-
                 <aside class="notes">
                   <h2>Как начинается процесс соединения с сервером?</h2>
                   <p>
@@ -150,12 +137,6 @@
                     Если сервер поддерживает протокол WebSocket, он согласится
                     перейти на него и сообщит об этом в заголовке ответа Upgrade
                   </p>
-
-                  <p>
-                    Углубляться в процессы того как работают фреймы,
-                    фрагментация данных,heartbeat-сообщений и тд можете
-                    прочитать об этом в документации технологии.
-                  </p>
                 </aside>
               </div>
             </div>
@@ -169,7 +150,6 @@
               <li class="fragment highlight">Принцип работы SSE.</li>
               <li class="fragment highlight">Основные характеристики.</li>
               <li class="fragment highlight">Преимущества SSE.</li>
-              <li class="fragment highlight">Недостатки SSE.</li>
             </ul>
             <img src="/assets/sse.png" alt="two-people" width="40%" />
           </div>
@@ -187,9 +167,7 @@
               Принцип работы SSE довольно прост: клиент устанавливает соединение
               с сервером и остается открытым, ожидая получения данных. Сервер
               может отправлять данные клиенту в любое время, даже без запроса со
-              стороны клиента. Для этого используется специальный формат ответа
-              HTTP, который содержит заголовок "Content-Type:
-              text/event-stream".
+              стороны клиента.
             </p>
 
             <h2>Основные характеристики SSE:</h2>
@@ -221,22 +199,6 @@
                 сторонних библиотек или плагинов.
               </li>
             </ul>
-
-            <h2>Недостатки SSE:</h2>
-            <ul>
-              <li>
-                Ограниченная поддержка браузерами: хотя большинство современных
-                браузеров поддерживают SSE, некоторые старые или
-                малоиспользуемые браузеры могут не поддерживать эту технологию.
-              </li>
-              <li>
-                Не поддерживается двунаправленный обмен данными: SSE подходит
-                только для передачи данных от сервера к клиенту и не
-                предоставляет возможности для обратной связи от клиента к
-                серверу без использования дополнительных технологий, таких как
-                WebSocket.
-              </li>
-            </ul>
           </aside>
         </section>
 
@@ -260,20 +222,29 @@
               "
             >
               <p>На сервере (Node.js с использованием Express):</p>
-              <pre><code class="hljs javascript" data-trim data-line-numbers="|3-5|10">
-					<script type="text/template">
-						app.get('/sse', (req, res) => {
-							// Установка заголовков для SSE
-							res.setHeader('Content-Type', 'text/event-stream');
-							res.setHeader('Cache-Control', 'no-cache');
-							res.setHeader('Connection', 'keep-alive');
-						
-							// Отправка данных клиенту через SSE каждую секунду
-							setInterval(() => {
-								const data = { message: 'Привет, мир!' };
-								res.write(`data: ${JSON.stringify(data)}\n\n`);
-							}, 1000);
-						});
+              <pre><code class="hljs javascript" data-trim data-line-numbers="|2-5|8-14|19">
+					    <script type="text/template">
+              // Настройка HTTP/2 сервера
+              const server = http2.createSecureServer({
+                key: fs.readFileSync('server.key'),  // Путь SSL ключу
+                cert: fs.readFileSync('server.crt')  // Путь SSL сертификату
+              }, app);
+
+              // Маршрут для обработки SSE
+              app.get('/sse', (req, res) => {
+                // Установка заголовков для SSE
+                res.writeHead(200, {
+                  'Content-Type': 'text/event-stream',
+                  'Cache-Control': 'no-cache',
+                  'Connection': 'keep-alive'
+                });
+
+                // Отправка данных клиенту через SSE каждые 5 секунд
+                const intervalId = setInterval(() => {
+                  const data = { message: 'Привет, мир!' };
+                  res.write(`data: ${JSON.stringify(data)}\n\n`);
+							        }, 1000);
+              });
 				</script></code></pre>
               <p>На клиенте (JavaScript):</p>
               <pre><code data-trim data-noescape  data-line-numbers="|2|5-8"><script type="text/template">
@@ -291,8 +262,8 @@
               <aside class="notes">
                 <h2>Настройка серверной стороны:</h2>
                 <p>
-                  В случае использования Node.js с Express, это реализовывается
-                  с помощью создания маршрута для обработки SSE-запросов.
+                  Мы создаем HTTP/2 сервер с помощью http2.createSecureServer(),
+                  указывая SSL-ключ и сертификат.
                 </p>
                 <h2>Установка HTTP-заголовков:</h2>
                 <p>
@@ -315,88 +286,158 @@
           </div>
         </section>
 
-        <section data-background-image="https://your_image4.jpg">
-          <h2 class="title">Сходства и различия между SSE и WebSocket</h2>
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Критерий</th>
-                <th>SSE</th>
-                <th>WebSocket</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Тип связи</td>
-                <td>Односторонняя (сервер -> клиент)</td>
-                <td>Двусторонняя (сервер <-> клиент)</td>
-              </tr>
-              <tr>
-                <td>Инициатор связи</td>
-                <td>Сервер</td>
-                <td>Сервер/клиент</td>
-              </tr>
-              <tr>
-                <td>Поддержка браузеров</td>
-                <td>Нативная</td>
-                <td>Не полная</td>
-              </tr>
-              <tr>
-                <td>Протокол</td>
-                <td>HTTP</td>
-                <td>WebSocket</td>
-              </tr>
-              <tr>
-                <td>Производительность</td>
-                <td>Низкая/Средняя</td>
-                <td>Высокая</td>
-              </tr>
-              <tr>
-                <td>Нагрузка на сервер</td>
-                <td>Низкая</td>
-                <td>Средняя/Высокая</td>
-              </tr>
-              <tr>
-                <td>Сложность реализации</td>
-                <td>Простая</td>
-                <td>Сложная</td>
-              </tr>
-            </tbody>
-          </table>
+        <section data-auto-animate>
+          <h2 class="title">HTTP/2 - новый уровень веб-коммуникации</h2>
+          <img src="assets/htt2diff.png" width="800px" />
 
           <aside class="notes">
-            * SSE - простой и удобный вариант для односторонней связи. *
-            WebSocket - более мощный и производительный инструмент для
-            двусторонней связи в реальном времени. * Выбор между SSE и WebSocket
-            зависит от конкретной задачи.
+            <p>
+              Так как технология SSE основана на HTTP, она отлично сочетается с
+              HTTP/2. Её можно скомбинировать с некоторыми возможностями HTTP/2,
+              что открывает дополнительные перспективы. А именно, HTTP/2 даёт
+              эффективный транспортный уровень, основанный на
+              мультиплексированных каналах.
+            </p>
+            <p>
+              Одна из его основных характеристик заключается в том, что одно
+              HTTP/2-соединение может содержать несколько одновременно открытых
+              потоков.
+            </p>
+            <b>Преимущества HTTP/2:</b>
+            <ul>
+              <li>
+                Сжатие заголовков: Уменьшение размера передаваемых данных.
+              </li>
+              <li>Мультиплексирование: Параллельная загрузка ресурсов.</li>
+              <li>
+                Приоритизация: Возможность указывать приоритетность запросов.
+              </li>
+              <li>Server Push: Передача сервером ресурсов заранее.</li>
+            </ul>
           </aside>
         </section>
 
         <section data-auto-animate>
-          <h2 class="title">Когда использовать SSE, а когда WebSocket</h2>
-          <ul>
-            <li>SSE:</li>
+          <h2 class="title">HTTP/2 - новый уровень веб-коммуникации</h2>
+          <img src="assets/htt2diff.png" width="800px" />
+          <img src="assets/http2.png" width="800px" />
+
+          <aside class="notes">
+            <p>
+              Так как технология SSE основана на HTTP, она отлично сочетается с
+              HTTP/2. Её можно скомбинировать с некоторыми возможностями HTTP/2,
+              что открывает дополнительные перспективы. А именно, HTTP/2 даёт
+              эффективный транспортный уровень, основанный на
+              мультиплексированных каналах.
+            </p>
+            <p>
+              Одна из его основных характеристик заключается в том, что одно
+              HTTP/2-соединение может содержать несколько одновременно открытых
+              потоков.
+            </p>
+            <b>Преимущества HTTP/2:</b>
             <ul>
-              <li>Простые задачи, где не требуется двусторонняя связь.</li>
               <li>
-                Обновление информации в реальном времени, например, новости,
-                биржевые сводки.
+                Сжатие заголовков: Уменьшение размера передаваемых данных.
               </li>
-              <li>Чаты с низкой интенсивностью обмена сообщениями.</li>
+              <li>Мультиплексирование: Параллельная загрузка ресурсов.</li>
+              <li>
+                Приоритизация: Возможность указывать приоритетность запросов.
+              </li>
+              <li>Server Push: Передача сервером ресурсов заранее.</li>
             </ul>
-            <li>WebSocket:</li>
-            <ul>
-              <li>
-                Задачи, где требуется двусторонняя связь в реальном времени.
-              </li>
-              <li>Игры, чаты, онлайн-редакторы.</li>
-              <li>
-                Приложения, где важна высокая производительность и низкая
-                задержка.
-              </li>
-            </ul>
-          </ul>
+          </aside>
         </section>
+        <section data-auto-animate>
+          <h2>Поддержка веб-браузеров</h2>
+          <img src="assets/wssbrowser.jpeg" width="900px" />
+          <aside class="notes">
+            <p>
+              Кроме того, во внимание стоит принять и поддержку технологий
+              браузерами. Посмотрим, как с этим дела обстоят у WebSocket:
+            </p>
+          </aside>
+        </section>
+        <section data-auto-animate>
+          <h2>Поддержка веб-браузеров</h2>
+          <div
+            style="
+              display: flex;
+              flex-direction: row;
+              justify-content: space-around;
+            "
+          >
+            <img src="assets/wssbrowser.jpeg" width="900px" />
+            <img src="assets/http2browser.jpeg" width="900px" />
+          </div>
+          <aside class="notes">
+            <p>
+              Кроме того, во внимание стоит принять и поддержку технологий
+              браузерами. Посмотрим, как с этим дела обстоят у WebSocket:
+            </p>
+
+            <p>
+              Тут можно отметить следующие особенности поддержки HTTP/2 в разных
+              браузерах:
+            </p>
+
+            <ul>
+              <li>
+                Поддержка HTTP/2 только с использованием TLS (что, на самом
+                деле, не так уж и плохо).
+              </li>
+            </ul>
+          </aside>
+        </section>
+
+
+        <section >
+          <h2 class="title">Сходства и различия между SSE и WebSocket</h2>
+          <table class="table">
+            <thead>
+            <tr>
+              <th>Критерий</th>
+              <th>HTTP/2</th>
+              <th>WebSocket</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>Сжатие заголовков</td>
+              <td>Да</td>
+              <td>Нет</td>
+            </tr>
+            <tr>
+              <td>Передача бинарных данных</td>
+              <td>Да</td>
+              <td>Да(бинарные и текстовые)</td>
+            </tr>
+            <tr>
+              <td>Мультиплексирование</td>
+              <td>Да</td>
+              <td>Да</td>
+            </tr>
+            <tr>
+              <td>Приоритизация</td>
+              <td>Да</td>
+              <td>Нет</td>
+            </tr>
+            <tr>
+              <td>Направление</td>
+              <td>Клиент/Сервер и Server Push</td>
+              <td>Двунаправленная передача данных</td>
+            </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h2>Итог</h2>
+          <aside class="notes">
+            <p>Как видите, у технологий WebSockets и HTTP/2+SSE есть, в сравнении друг с другом, и преимущества, и недостатки. Что же всё-таки выбрать? Пожалуй, на этот вопрос поможет ответить лишь анализ конкретного проекта и всесторонний учёт его требований и особенностей. Возможно, помощь при принятии решения окажет знание того, как эти технологии используют в уже существующих проектах.</p>
+          </aside>
+        </section>
+
       </div>
     </div>
 
